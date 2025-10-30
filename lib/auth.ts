@@ -20,18 +20,21 @@ export async function authenticateUser(
       query['metadata.password'] = credentials.password;
     }
 
-    // Fixed: Properly await the complete query chain
-    const response = await cosmic.objects
+    // Fixed: The Cosmic SDK returns FindChaining, we need to properly type and execute the query
+    const queryBuilder = cosmic.objects
       .find(query)
       .props(['id', 'title', 'slug', 'metadata'])
       .depth(1);
+    
+    // Execute the query and get the response
+    const response = await queryBuilder;
 
-    // Fixed: Handle empty results
+    // Handle empty results
     if (!response.objects || response.objects.length === 0) {
       return null;
     }
 
-    // Fixed: Explicitly handle undefined case with proper type narrowing
+    // Return the first user with proper type assertion
     const user = response.objects[0];
     return user ? (user as User) : null;
   } catch (error) {
