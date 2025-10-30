@@ -20,6 +20,7 @@ export async function authenticateUser(
       query['metadata.password'] = credentials.password;
     }
 
+    // Fixed: Pass the complete query chain as a function to safeFetch
     const users = await safeFetch<User>(() =>
       cosmic.objects
         .find(query)
@@ -31,7 +32,9 @@ export async function authenticateUser(
       return null;
     }
 
-    return users[0];
+    // Fixed: Handle undefined case when accessing array element
+    const user = users[0];
+    return user ?? null;
   } catch (error) {
     console.error('Authentication error:', error);
     return null;
